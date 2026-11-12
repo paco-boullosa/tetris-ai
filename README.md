@@ -88,6 +88,20 @@ Después abre `http://localhost:8000` en el navegador.
 
 ---
 
+## Modo desafío
+
+Al abrir el juego aparece un menú con el modo **Clásico** y cinco desafíos con objetivo (los desafíos usan bloques grises, color 8):
+
+| Desafío | Regla | Victoria |
+|---|---|---|
+| Sprint 40 | — | 40 líneas en 2:00 (si se acaba el tiempo, pierdes) |
+| Marea de basura | Cada 10 s sube una fila gris con un hueco | Sobrevivir 2:00 |
+| Bloques fijos | Tablero con 6 filas de bloques grises | Eliminar todos los grises |
+| Piezas fantasma | Las piezas se vuelven invisibles al fijarse | 20 líneas |
+| Rotación inversa | Empieza en nivel 5; desde el nivel 6 la rotación es antihoraria | Llegar al nivel 8 |
+
+`P` pausa y, estando en pausa o en game over, `M` vuelve al menú. El nivel se calcula como `nivel inicial + floor(líneas / 10)` (nivel inicial 1 salvo en Rotación inversa).
+
 ## Cómo funciona
 
 El juego se compone de tres archivos que cooperan:

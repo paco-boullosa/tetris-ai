@@ -1,0 +1,57 @@
+- generic [active] [ref=e1]:
+  - heading "TETRIS" [level=1] [ref=e2]
+  - generic [ref=e3]:
+    - complementary [ref=e6]:
+      - generic [ref=e7]:
+        - generic [ref=e8]: SCORE
+        - generic [ref=e9]: "0"
+      - generic [ref=e10]:
+        - generic [ref=e11]: LINES
+        - generic [ref=e12]: "0"
+      - generic [ref=e13]:
+        - generic [ref=e14]: LEVEL
+        - generic [ref=e15]: "1"
+      - generic [ref=e16]: NEXT
+      - generic [ref=e19]:
+        - generic [ref=e20]: CONTROLS
+        - list [ref=e21]:
+          - listitem [ref=e22]:
+            - generic [ref=e23]: ←
+            - generic [ref=e24]: →
+            - text: mover
+          - listitem [ref=e25]:
+            - generic [ref=e26]: ↑
+            - text: rotar
+          - listitem [ref=e27]:
+            - generic [ref=e28]: ↓
+            - text: bajar
+          - listitem [ref=e29]:
+            - generic [ref=e30]: Space
+            - text: caída
+          - listitem [ref=e31]:
+            - generic [ref=e32]: P
+            - text: pausa
+          - listitem [ref=e33]:
+            - generic [ref=e34]: M
+            - text: menú (en pausa)
+    - generic [ref=e36]:
+      - paragraph [ref=e37]: MODO DE JUEGO
+      - generic [ref=e38]:
+        - button "Clásico Juego libre sin objetivo" [ref=e39] [cursor=pointer]:
+          - strong [ref=e40]: Clásico
+          - generic [ref=e41]: Juego libre sin objetivo
+        - button "Sprint 40 Limpia 40 líneas en 2 minutos" [ref=e42] [cursor=pointer]:
+          - strong [ref=e43]: Sprint 40
+          - generic [ref=e44]: Limpia 40 líneas en 2 minutos
+        - button "Marea de basura Sobrevive 2 minutos con basura subiendo cada 10 s" [ref=e45] [cursor=pointer]:
+          - strong [ref=e46]: Marea de basura
+          - generic [ref=e47]: Sobrevive 2 minutos con basura subiendo cada 10 s
+        - button "Bloques fijos Elimina todos los bloques grises pre-colocados" [ref=e48] [cursor=pointer]:
+          - strong [ref=e49]: Bloques fijos
+          - generic [ref=e50]: Elimina todos los bloques grises pre-colocados
+        - button "Piezas fantasma Las piezas se vuelven invisibles al fijarse. Limpia 20 líneas" [ref=e51] [cursor=pointer]:
+          - strong [ref=e52]: Piezas fantasma
+          - generic [ref=e53]: Las piezas se vuelven invisibles al fijarse. Limpia 20 líneas
+        - button "Rotación inversa Empiezas en nivel 5; desde el nivel 6 la rotación se invierte. Llega al nivel 8" [ref=e54] [cursor=pointer]:
+          - strong [ref=e55]: Rotación inversa
+          - generic [ref=e56]: Empiezas en nivel 5; desde el nivel 6 la rotación se invierte. Llega al nivel 8

@@ -26,6 +26,12 @@
           <span class="value" id="level">1</span>
         </div>
 
+        <div class="panel-section hidden" id="goal-section">
+          <span class="label">OBJETIVO</span>
+          <span class="goal-text" id="goal-text"></span>
+          <span class="goal-progress" id="goal-progress"></span>
+        </div>
+
         <div class="panel-section">
           <span class="label">NEXT</span>
           <canvas id="next-canvas" width="120" height="120"></canvas>
@@ -39,16 +45,22 @@
             <li><kbd>↓</kbd> bajar</li>
             <li><kbd>Space</kbd> caída</li>
             <li><kbd>P</kbd> pausa</li>
+            <li><kbd>M</kbd> menú (en pausa)</li>
           </ul>
         </div>
       </aside>
     </div>
 
     <div id="overlay" class="overlay hidden">
-      <div class="overlay-box">
+      <div id="menu" class="overlay-box menu hidden">
+        <p class="menu-title">MODO DE JUEGO</p>
+        <div id="menu-list" class="menu-list"></div>
+      </div>
+      <div id="end-box" class="overlay-box hidden">
         <p id="overlay-title">GAME OVER</p>
         <p id="overlay-score"></p>
         <button id="restart-btn">Reiniciar</button>
+        <button id="menu-btn" class="secondary-btn">Menú</button>
       </div>
     </div>
   </div>
