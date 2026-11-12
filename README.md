@@ -103,6 +103,20 @@ Al abrir el juego aparece un menú con el modo **Clásico** y cinco desafíos co
 
 `P` pausa y, estando en pausa o en game over, `M` vuelve al menú. El nivel se calcula como `nivel inicial + floor(líneas / 10)` (nivel inicial 1 salvo en Rotación inversa).
 
+## Power-ups
+
+Cada 5 líneas, la siguiente pieza aparece marcada (borde pulsante + icono) con un power-up aleatorio. El efecto se activa al fijarse la pieza, centrado en ella. Funciona en todos los modos.
+
+| Power-up | Efecto |
+|---|---|
+| 💣 Bomba | Destruye un área de 3×3 |
+| ⚡ Rayo | Limpia la fila y la columna completas |
+| 🎨 Tinte | Los bloques del color de la pieza se vuelven comodines blancos y desaparecen al instante |
+| ⬇️ Gravedad | Compacta los huecos del tablero (los bloques caen en cada columna) |
+| ❄️ Congelar | Pausa la caída automática durante 5 s (puedes seguir moviendo) |
+
+Los power-ups no dan puntos por sí mismos; las líneas que completen puntúan como siempre.
+
 ## Cómo funciona
 
 El juego se compone de tres archivos que cooperan:

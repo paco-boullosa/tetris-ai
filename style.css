@@ -189,6 +189,12 @@ kbd {
   color: #ffd54f;
 }
 
+.power-status {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffd54f;
+}
+
 /* ---- Menú de modos ---- */
 .menu-title {
   font-size: 18px;

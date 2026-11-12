@@ -14,7 +14,21 @@ const COLORS = [
   '#7986cb', // J - indigo
   '#ffb74d', // L - orange
   '#5a5a6e', // 8 - gris (basura / bloques fijos de los desafíos)
+  '#ffffff', // 9 - comodín (efecto del power-up Tinte)
 ];
+
+const POWERUPS = {
+  bomb:    { name: 'Bomba',    icon: '💣', flash: '¡BOMBA!' },
+  ray:     { name: 'Rayo',     icon: '⚡', flash: '¡RAYO!' },
+  tint:    { name: 'Tinte',    icon: '🎨', flash: '¡TINTE!' },
+  gravity: { name: 'Gravedad', icon: '⬇️', flash: '¡GRAVEDAD!' },
+  freeze:  { name: 'Congelar', icon: '❄️', flash: '¡CONGELADO!' },
+};
+const POWER_KEYS = Object.keys(POWERUPS);
+const POWER_EVERY = 5;    // líneas entre power-ups
+const FREEZE_MS = 5000;
+const WILD_MS = 400;
+const FLASH_MS = 800;
 
 const PIECES = [
   null,
@@ -47,10 +61,13 @@ const endBox = document.getElementById('end-box');
 const goalSection = document.getElementById('goal-section');
 const goalText = document.getElementById('goal-text');
 const goalProgress = document.getElementById('goal-progress');
+const powerStatusEl = document.getElementById('power-status');
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
 let mode = null, elapsed = 0, garbageAccum = 0, startLevel = 1;
 let showGhost = true; // se alterna con la tecla G; no se resetea en init()
+let nextPowerAt = POWER_EVERY, pendingPower = false, freezeLeft = 0, wildLeft = 0;
+let flash = { text: '', left: 0 };
 
 const GARBAGE_EVERY = 10000;
 const TIME_LIMIT = 120000;
@@ -195,7 +212,63 @@ function clearLines() {
     level = startLevel + Math.floor(lines / 10);
     dropInterval = Math.max(100, 1000 - (level - 1) * 90);
     updateHUD();
+    while (lines >= nextPowerAt) {
+      nextPowerAt += POWER_EVERY;
+      pendingPower = true;
+    }
   }
+}
+
+// Centro (redondeado) de las celdas ocupadas de la pieza, dentro del tablero
+function pieceCenter(p) {
+  let sx = 0, sy = 0, n = 0;
+  for (let r = 0; r < p.shape.length; r++)
+    for (let c = 0; c < p.shape[r].length; c++)
+      if (p.shape[r][c]) { sx += p.x + c; sy += p.y + r; n++; }
+  return {
+    cx: Math.min(COLS - 1, Math.max(0, Math.round(sx / n))),
+    cy: Math.min(ROWS - 1, Math.max(0, Math.round(sy / n))),
+  };
+}
+
+function compactBoard() {
+  for (let c = 0; c < COLS; c++) {
+    const col = [];
+    for (let r = 0; r < ROWS; r++) if (board[r][c]) col.push(board[r][c]);
+    for (let r = ROWS - 1; r >= 0; r--) board[r][c] = col.length ? col.pop() : 0;
+  }
+}
+
+function clearWild() {
+  for (const row of board)
+    for (let c = 0; c < COLS; c++) if (row[c] === 9) row[c] = 0;
+}
+
+function applyPowerUp(p) {
+  const { cx, cy } = pieceCenter(p);
+  switch (p.power) {
+    case 'bomb':
+      for (let r = cy - 1; r <= cy + 1; r++)
+        for (let c = cx - 1; c <= cx + 1; c++)
+          if (r >= 0 && r < ROWS && c >= 0 && c < COLS) board[r][c] = 0;
+      break;
+    case 'ray':
+      for (let c = 0; c < COLS; c++) board[cy][c] = 0;
+      for (let r = 0; r < ROWS; r++) board[r][cx] = 0;
+      break;
+    case 'tint':
+      for (const row of board)
+        for (let c = 0; c < COLS; c++) if (row[c] === p.type) row[c] = 9;
+      wildLeft = WILD_MS;
+      break;
+    case 'gravity':
+      compactBoard();
+      break;
+    case 'freeze':
+      freezeLeft = FREEZE_MS;
+      break;
+  }
+  flash = { text: POWERUPS[p.power].flash, left: FLASH_MS };
 }
 
 function ghostY() {
@@ -223,6 +296,7 @@ function softDrop() {
 
 function lockPiece() {
   merge();
+  if (current.power) applyPowerUp(current);
   clearLines();
   if (mode?.checkWin?.()) {
     endGame(true);
@@ -247,10 +321,40 @@ function addGarbageRow() {
 function spawn() {
   current = next;
   next = randomPiece();
+  if (pendingPower) {
+    next.power = POWER_KEYS[Math.floor(Math.random() * POWER_KEYS.length)];
+    pendingPower = false;
+  }
   if (collide(current.shape, current.x, current.y)) {
     endGame();
   }
   drawNext();
+}
+
+function updatePowerHUD() {
+  let text;
+  if (freezeLeft > 0) text = `❄️ Congelado ${Math.ceil(freezeLeft / 1000)}s`;
+  else if (next?.power) text = `Siguiente: ${POWERUPS[next.power].icon} ${POWERUPS[next.power].name}`;
+  else text = `en ${Math.max(0, nextPowerAt - lines)} líneas`;
+  if (powerStatusEl.textContent !== text) powerStatusEl.textContent = text;
+}
+
+function drawPowerIcon(context, x, y, size, key) {
+  const pulse = 0.5 + 0.5 * Math.sin(performance.now() / 150);
+  context.strokeStyle = `rgba(255,255,255,${0.4 + 0.6 * pulse})`;
+  context.lineWidth = 2;
+  context.strokeRect(x * size + 2, y * size + 2, size - 4, size - 4);
+  context.font = `${Math.floor(size * 0.6)}px sans-serif`;
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+  context.fillStyle = '#fff';
+  context.fillText(POWERUPS[key].icon, x * size + size / 2, y * size + size / 2 + 1);
+}
+
+function drawPowerPiece(context, p, size, offX, offY) {
+  for (let r = 0; r < p.shape.length; r++)
+    for (let c = 0; c < p.shape[r].length; c++)
+      if (p.shape[r][c]) drawPowerIcon(context, offX + c, offY + r, size, p.power);
 }
 
 function updateHUD() {
@@ -311,6 +415,27 @@ function draw() {
   for (let r = 0; r < current.shape.length; r++)
     for (let c = 0; c < current.shape[r].length; c++)
       drawBlock(ctx, current.x + c, current.y + r, current.shape[r][c], BLOCK);
+  if (current.power) drawPowerPiece(ctx, current, BLOCK, current.x, current.y);
+
+  // congelado: velo azul
+  if (freezeLeft > 0) {
+    ctx.fillStyle = 'rgba(100, 181, 246, 0.18)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  // aviso del power-up
+  if (flash.left > 0) {
+    ctx.globalAlpha = Math.min(1, flash.left / 300);
+    ctx.font = 'bold 36px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = '#0f0f17';
+    ctx.strokeText(flash.text, canvas.width / 2, canvas.height / 3);
+    ctx.fillStyle = '#ffd54f';
+    ctx.fillText(flash.text, canvas.width / 2, canvas.height / 3);
+    ctx.globalAlpha = 1;
+  }
 }
 
 function drawNext() {
@@ -322,6 +447,7 @@ function drawNext() {
   for (let r = 0; r < shape.length; r++)
     for (let c = 0; c < shape[r].length; c++)
       drawBlock(nextCtx, offX + c, offY + r, shape[r][c], NB);
+  if (next.power) drawPowerPiece(nextCtx, next, NB, offX, offY);
 }
 
 function endGame(won = false, reason = '') {
@@ -392,8 +518,14 @@ function togglePause() {
 function loop(ts) {
   const dt = Math.max(0, ts - lastTime);
   lastTime = ts;
-  dropAccum += dt;
+  if (freezeLeft > 0) freezeLeft = Math.max(0, freezeLeft - dt);
+  else dropAccum += dt;
   elapsed += dt;
+  if (wildLeft > 0) {
+    wildLeft -= dt;
+    if (wildLeft <= 0) { wildLeft = 0; clearWild(); }
+  }
+  if (flash.left > 0) flash.left -= dt;
 
   if (mode) {
     mode.tick?.(dt);
@@ -414,6 +546,7 @@ function loop(ts) {
   if (gameOver) return; // endGame() dentro de lockPiece/spawn: no seguir el bucle
   draw();
   updateGoal();
+  updatePowerHUD();
   animId = requestAnimationFrame(loop);
 }
 
@@ -429,6 +562,11 @@ function init(modeId = null) {
   gameOver = false;
   elapsed = 0;
   garbageAccum = 0;
+  nextPowerAt = POWER_EVERY;
+  pendingPower = false;
+  freezeLeft = 0;
+  wildLeft = 0;
+  flash = { text: '', left: 0 };
   dropInterval = Math.max(100, 1000 - (level - 1) * 90);
   dropAccum = 0;
   lastTime = performance.now();
@@ -436,6 +574,7 @@ function init(modeId = null) {
   next = randomPiece();
   spawn();
   updateHUD();
+  updatePowerHUD();
   overlayTitle.classList.remove('win');
   if (mode) {
     goalText.textContent = mode.goal;
