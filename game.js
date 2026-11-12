@@ -50,6 +50,7 @@ const goalProgress = document.getElementById('goal-progress');
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
 let mode = null, elapsed = 0, garbageAccum = 0, startLevel = 1;
+let showGhost = true; // se alterna con la tecla G; no se resetea en init()
 
 const GARBAGE_EVERY = 10000;
 const TIME_LIMIT = 120000;
@@ -298,11 +299,13 @@ function draw() {
         drawBlock(ctx, c, r, board[r][c], BLOCK);
 
   // ghost
-  const gy = ghostY();
-  for (let r = 0; r < current.shape.length; r++)
-    for (let c = 0; c < current.shape[r].length; c++)
-      if (current.shape[r][c])
-        drawBlock(ctx, current.x + c, gy + r, current.shape[r][c], BLOCK, 0.2);
+  if (showGhost) {
+    const gy = ghostY();
+    for (let r = 0; r < current.shape.length; r++)
+      for (let c = 0; c < current.shape[r].length; c++)
+        if (current.shape[r][c])
+          drawBlock(ctx, current.x + c, gy + r, current.shape[r][c], BLOCK, 0.2);
+  }
 
   // current piece
   for (let r = 0; r < current.shape.length; r++)
@@ -448,6 +451,11 @@ function init(modeId = null) {
 document.addEventListener('keydown', e => {
   if (e.code === 'KeyP') { togglePause(); return; }
   if (e.code === 'KeyM' && (paused || gameOver)) { showMenu(); return; }
+  if (e.code === 'KeyG') {
+    showGhost = !showGhost;
+    if (current && !paused && !gameOver) draw();
+    return;
+  }
   if (paused || gameOver) return;
   switch (e.code) {
     case 'ArrowLeft':

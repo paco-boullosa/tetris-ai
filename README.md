@@ -37,7 +37,7 @@ Es una versión jugable del Tetris clásico con todas las mecánicas que esperar
 - Las **7 piezas estándar** (I, O, T, S, Z, J, L) con colores diferenciados.
 - **Rotación** con _wall kicks_ básicos (pequeños desplazamientos para que la pieza pueda rotar pegada a la pared).
 - **Soft drop** (bajada acelerada) y **hard drop** (caída instantánea).
-- **Pieza fantasma** (_ghost piece_): muestra dónde aterrizará la pieza actual.
+- **Pieza fantasma** (_ghost piece_): muestra dónde aterrizará la pieza actual (se activa/desactiva con `G`).
 - **Vista previa** de la siguiente pieza.
 - **Sistema de puntuación** clásico de Tetris (100 / 300 / 500 / 800 multiplicado por nivel).
 - **Niveles** que aumentan cada 10 líneas y aceleran la caída.
@@ -84,6 +84,7 @@ Después abre `http://localhost:8000` en el navegador.
 | `↑` o `X` | Rotar la pieza en sentido horario |
 | `↓`       | Soft drop (bajar más rápido)      |
 | `Espacio` | Hard drop (caída instantánea)     |
+| `G`       | Mostrar / ocultar la pieza fantasma |
 | `P`       | Pausar / reanudar                 |
 
 ---
